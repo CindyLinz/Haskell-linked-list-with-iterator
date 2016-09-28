@@ -1,7 +1,14 @@
 name:                linked-list-with-iterator
 version:             0.1.0.0
-synopsis:            Initial project template from stack
-description:         Please see README.md
+synopsis:            A pure linked list which is mutable through iterators.
+description:
+  It's iternally implemented by 'Data.IntMap.Strict.IntMap' or 'Data.Map.Strict.Map' 'Integer',
+  using 'Int' or 'Integer' as the iterator type respectly.
+  Most of the operations cost @O(lg N)@.
+  .
+  Each newly inserted element will consume a unique number and never reuse old numbers.
+  Choose 'Int' one if you're sure that there're no more than 'Int' space times of insertions,
+  or choose 'Integer' one otherwise.
 homepage:            https://github.com/CindyLinz/Haskell-linked-list-with-iterator#readme
 license:             BSD3
 license-file:        LICENSE
@@ -16,7 +23,8 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     Data.IterLinkedList
-  build-depends:       base >= 4.7 && < 5
+                     , Data.IterLinkedList.Internal
+  build-depends:       base >= 4.3 && < 5
                      , containers == 0.5.*
   default-language:    Haskell2010
 
