@@ -1,5 +1,23 @@
 {-# LANGUAGE TypeFamilies, NamedFieldPuns, RecordWildCards, FlexibleInstances #-}
 
+{-|
+Module      : Data.IterLinkedList
+Description : A pure linked list which is mutable through iterators.
+Copyright   : (c) CindyLinz, 2016
+License     : MIT
+Maintainer  : cindylinz@gmail.com
+Portability : portable
+
+A pure linked list with is mutable through iterators.
+
+It's iternally implemented by 'Data.IntMap.Strict.IntMap' or 'Data.Map.Strict.Map' 'Integer',
+using 'Int' or 'Integer' as the iterator type respectly.
+Most of the operations cost O(lg N).
+Each newly inserted element will consume a unique number and never reuse old numbers.
+Choose 'Int' one if you're sure that there're no more than 'Int' space times of insertions,
+r choose 'Integer' one otherwise.
+-}
+
 module Data.IterLinkedList
   ( IterLinkedList (..)
   , LinkedList
@@ -28,59 +46,67 @@ type instance LinkedListContainer Int value = IM.IntMap (Int, value, Int)
 type instance LinkedListContainer Integer value = M.Map Integer (Integer, value, Integer)
 
 class Enum iter => IterLinkedList iter where
+  -- | See if this list is an empty list. O(1)
   null :: LinkedList iter value -> Bool
 
-  -- | Get the element value
+  -- | Get the element value. O(lg N)
   get :: iter -> LinkedList iter value -> Maybe value
 
-  -- | Get the element value. Get undefined if not found
+  -- | Get the element value. Get undefined if not found. O(lg N)
   get' :: iter -> LinkedList iter value -> value
 
   -- | Get the next iterator.
   --   If the specified iterator is the last one, or isn't in the list,
-  --   return the original one.
+  --   return the original one. O(lg N)
   next :: LinkedList iter value -> iter -> iter
 
   -- | Get the previous iterator.
   --   If the specified iterator is the first one, or isn't in the list,
-  --   return the original one.
+  --   return the original one. O(lg N)
   prev :: LinkedList iter value -> iter -> iter
 
-  -- | Get an empty list
+  -- | Get an empty list. O(1)
   empty :: LinkedList iter value
 
-  -- | Get a list with exactly one element
+  -- | Get a list with exactly one element. O(1)
   singleton :: value -> LinkedList iter value
 
   -- | Insert a new element before the specified iterator.
   --   If the list is empty, just insert the new element as the only element.
   --   If the specified iterator can't be found, prepend the new element to the whole list.
+  --   O(lg N)
   insertBefore :: iter -> value -> LinkedList iter value -> LinkedList iter value
 
   -- | Insert a new element after the specified iterator.
   --   If the list is empty, just insert the new element as the only element.
   --   If the specified iterator can't be found, append the new element to the whole list.
+  --   O(lg N)
   insertAfter :: iter -> value -> LinkedList iter value -> LinkedList iter value
 
   -- | Delete the specified element from the list.
   --   If there's no such element in the list, return the original list.
+  --   O(lg N)
   delete :: iter -> LinkedList iter value -> LinkedList iter value
 
   -- | Get a LinkedList from a list
+  --   O(N)
   fromList :: [value] -> LinkedList iter value
 
   -- | Get a list from a LinkedList
+  --   O(N)
   toList :: LinkedList iter value -> [value]
 
 -- | Get the first iterator.
 --   If the list is empty, you'll still get an unusable one.
 --   You can't get the value from the unusable iterator.
+--   O(lg N)
 firstIter :: LinkedList iter value -> iter
 firstIter LinkedList{firstKey} = firstKey
 
 -- | Get the last iterator.
 --   If the list is empty, you'll still get an unusable one.
 --   You can't get the value from the unusable iterator.
+--   O(lg N)
 lastIter :: LinkedList iter value -> iter
 lastIter LinkedList{lastKey} = lastKey
 
