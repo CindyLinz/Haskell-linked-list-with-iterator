@@ -1,5 +1,5 @@
 name:                linked-list-with-iterator
-version:             0.1.0.0
+version:             0.1.1.0
 synopsis:            A pure linked list which is mutable through iterators.
 description:
   It's iternally implemented by 'Data.IntMap.Strict.IntMap' or 'Data.Map.Strict.Map' 'Integer',

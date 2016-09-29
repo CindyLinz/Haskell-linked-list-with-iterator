@@ -44,7 +44,9 @@ type instance LinkedListContainer Int value = IM.IntMap (Int, value, Int)
 type instance LinkedListContainer Integer value = M.Map Integer (Integer, value, Integer)
 
 -- | Polymorphic operations on the list
-class Enum iter => IterLinkedList iter where
+class IterLinkedList iter where
+  {-# MINIMAL null, get, (set | modify), next, prev, empty, singleton, insertBefore, insertAfter, delete, toList #-}
+
   -- | See if this list is an empty list. @O(1)@
   null :: LinkedList iter value -> Bool
 
@@ -53,6 +55,21 @@ class Enum iter => IterLinkedList iter where
 
   -- | Get the element value. Get undefined if not found. @O(lg N)@
   get' :: iter -> LinkedList iter value -> value
+  get' iter list = case get iter list of
+    Just value -> value
+    Nothing -> undefined
+
+  -- | Set the element value.
+  --   Return the original list if the iterator is not in the list @O(lg N)@
+  set :: iter -> value -> LinkedList iter value -> LinkedList iter value
+  set iter value list = modify iter (const value) list
+
+  -- | Modify the element value.
+  --   Return the original list if the iterator is not in the list @O(lg N)@
+  modify :: iter -> (value -> value) -> LinkedList iter value -> LinkedList iter value
+  modify iter f list = case get iter list of
+    Just value -> set iter (f value) list
+    Nothing -> list
 
   -- | Get the next iterator.
   --   If the specified iterator is the last one, or isn't in the list,
@@ -90,6 +107,10 @@ class Enum iter => IterLinkedList iter where
   -- | Get a LinkedList from a list
   --   @O(N)@
   fromList :: [value] -> LinkedList iter value
+  fromList [] = empty
+  fromList (a:as) = go (singleton a) as where
+    go list (a:as) = go (insertAfter (lastIter list) a list) as
+    go list _ = list
 
   -- | Get a list from a LinkedList
   --   @O(N lg N)@
@@ -119,6 +140,14 @@ instance IterLinkedList Int where
   get' iter (LinkedList {..}) = case IM.lookup iter container of
     Just (prev, value, next) -> value
     _ -> undefined
+
+  set iter value list@(LinkedList {..}) = list{container = IM.adjust f iter container}
+    where
+      f (prevKey, _, nextKey) = (prevKey, value, nextKey)
+
+  modify iter f list@(LinkedList {..}) = list{container = IM.adjust g iter container}
+    where
+      g (prevKey, value, nextKey) = (prevKey, f value, nextKey)
 
   next (LinkedList {..}) iter = case IM.lookup iter container of
     Just (prev, value, next) -> next
@@ -230,6 +259,14 @@ instance IterLinkedList Integer where
   get' iter (LinkedList {..}) = case M.lookup iter container of
     Just (prev, value, next) -> value
     _ -> undefined
+
+  set iter value list@(LinkedList {..}) = list{container = M.adjust f iter container}
+    where
+      f (prevKey, _, nextKey) = (prevKey, value, nextKey)
+
+  modify iter f list@(LinkedList {..}) = list{container = M.adjust g iter container}
+    where
+      g (prevKey, value, nextKey) = (prevKey, f value, nextKey)
 
   next (LinkedList {..}) iter = case M.lookup iter container of
     Just (prev, value, next) -> next

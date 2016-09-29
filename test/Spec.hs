@@ -60,8 +60,20 @@ test =
       go step iter list = go (step + 2) (L.prev list' iter) list'
         where
           list' = L.delete (L.prev list iter) list
+
+    list9 = go 1 (L.firstIter list6) list6 where
+      go 21 _ list = list
+      go step iter list = go (step + 1) (L.next list' iter) list'
+        where
+          list' = L.set iter 7 list
+
+    list10 = go 1 (L.firstIter list6) list6 where
+      go 21 _ list = list
+      go step iter list = go (step + 1) (L.next list' iter) list'
+        where
+          list' = L.modify iter (+1) list
   in
-    [list1, list2, list3, list4, list5, list6, list7, list8]
+    [list1, list2, list3, list4, list5, list6, list7, list8, list9, list10]
 
 answers :: Num a => [[a]]
 answers =
@@ -73,6 +85,8 @@ answers =
   , [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
   , [20,18,16,14,12,10,8,6,4,2]
   , [2,4,6,8,10,12,14,16,18,20]
+  , [7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7]
+  , [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
   ]
 
 getForward :: forall a. (Eq a, L.IterLinkedList a) => L.LinkedList a Int -> [Int]

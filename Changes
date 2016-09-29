@@ -1,0 +1,6 @@
+0.1.1.0         2016.9.30
+                Add methods: set, modify.
+                Remove class Enum constraint.
+
+0.1.0.0         2016.9.28
+                First version
